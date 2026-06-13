@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>AI Meal Planner · Smart Cooking To‑Do List</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(145deg, #0b1120 0%, #030712 100%);
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      padding: 2rem 1.5rem;
+      color: #e2e8f0;
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    /* header */
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      font-size: 2.4rem;
+      background: linear-gradient(135deg, #bef264, #4ade80, #22c55e);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.3px;
+    }
+
+    .badge {
+      background: #1e293b;
+      display: inline-block;
+      padding: 0.2rem 0.9rem;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #bbf7d0;
+      margin-top: 0.5rem;
+    }
+
+    /* cards */
+    .card {
+      background: rgba(30, 41, 59, 0.75);
+      backdrop-filter: blur(8px);
+      border-radius: 1.8rem;
+      padding: 1.6rem;
+      margin-bottom: 1.8rem;
+      border: 1px solid rgba(74, 222, 128, 0.2);
+      transition: all 0.2s;
+    }
+
+    /* controls */
+    .control-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      align-items: flex-end;
+    }
+
+    .input-field {
+      flex: 1;
+      min-width: 160px;
+    }
+
+    .input-field label {
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: #9ca3af;
+      margin-bottom: 0.4rem;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border-radius: 60px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: white;
+      font-weight: 500;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: #4ade80;
+      box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.3);
+    }
+
+    button {
+      background: linear-gradient(105deg, #22c55e, #16a34a);
+      border: none;
+      padding: 0.8rem 1.6rem;
+      border-radius: 60px;
+      font-weight: bold;
+      font-size: 1rem;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+      width: 100%;
+    }
+
+    button:hover {
+      transform: scale(0.97);
+      background: linear-gradient(105deg, #16a34a, #15803d);
+    }
+
+    /* meal grid */
+    .meal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 1.5rem;
+      margin: 1rem 0;
+    }
+
+    .meal-item {
+      background: #0f172a;
+      border-radius: 1.5rem;
+      padding: 1.3rem;
+      border-left: 4px solid #4ade80;
+    }
+
+    .meal-item h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .meal-name {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #bef264;
+      margin: 0.5rem 0;
+    }
+
+    .ingredient-list {
+      list-style: none;
+      padding-left: 0;
+      margin: 0.8rem 0;
+    }
+
+    .ingredient-list li {
+      font-size: 0.85rem;
+      padding: 0.2rem 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cost-tag {
+      background: #1e293b;
+      display: inline-block;
+      padding: 0.2rem 0.9rem;
+      border-radius: 30px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .budget-panel {
+      background: #1e293b;
+      border-radius: 1.5rem;
+      padding: 1rem 1.3rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .budget-warning {
+      color: #facc15;
+      font-weight: bold;
+    }
+
+    .budget-safe {
+      color: #4ade80;
+    }
+
+    /* grocery checklist */
+    .checklist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 0.7rem;
+      margin: 1.2rem 0;
+      max-height: 320px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+
+    .checklist-item {
+      background: #0f172a;
+      border-radius: 60px;
+      padding: 0.5rem 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: 0.1s;
+    }
+
+    .progress-bar-bg {
+      background: #0f172a;
+      border-radius: 40px;
+      height: 10px;
+      margin: 0.6rem 0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      background: #4ade80;
+      height: 100%;
+      width: 0%;
+      transition: width 0.25s ease;
+    }
+
+    .substitution-list {
+      background: #0f172a;
+      border-radius: 1.2rem;
+      padding: 1rem 1.2rem;
+      margin-top: 0.8rem;
+    }
+
+    .substitution-list li {
+      margin-left: 1.3rem;
+      margin-bottom: 0.5rem;
+    }
+
+    hr {
+      border-color: #334155;
+      margin: 1rem 0;
+    }
+
+    .print-btn {
+      background: #334155;
+      box-shadow: none;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.7rem;
+      color: #475569;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🍲 AI Chef · Cooking To‑Do List</h1>
+    <div class="badge">⚡ PromptWars · Build with AI | Meal · Grocery · Budget · Substitutions</div>
+  </div>
+
+  <div class="card">
+    <div class="control-group">
+      <div class="input-field">
+        <label>💰 Daily budget (₹)</label>
+        <input type="number" id="budgetInput" value="550" step="20">
+      </div>
+      <div class="input-field">
+        <label>🥗 Diet</label>
+        <select id="dietSelect">
+          <option value="Veg">🌿 Veg</option>
+          <option value="Non-Veg">🍗 Non-Veg</option>
+          <option value="Vegan">🌱 Vegan</option>
+        </select>
+      </div>
+      <div class="input-field">
+        <label>⏱️ Cooking time</label>
+        <select id="timeSelect">
+          <option value="Quick">⚡ Quick (<25 min)</option>
+          <option value="Medium">🔥 Medium (~45 min)</option>
+          <option value="Relaxed">🍷 Relaxed (1h+)</option>
+        </select>
+      </div>
+      <div class="input-field">
+        <button id="generatePlanBtn">✨ Generate AI Plan ✨</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="dynamicContent"></div>
+  <footer>✅ Real budget feasibility • Dynamic grocery from ingredients • AI substitutions</footer>
+</div>
+
+<script>
+  // ---------- RECIPE KNOWLEDGE BASE ----------
+  const MEAL_DB = {
+    Veg: {
+      Quick: {
+        breakfast: { name: "🌾 Masala Poha", ingredients: ["Flattened rice (1 cup)", "Onion", "Peanuts", "Green chili", "Curry leaves", "Lemon"], cost: 48 },
+        lunch: { name: "🥪 Grilled Veg Sandwich", ingredients: ["Whole wheat bread (4 slices)", "Cheese slice", "Cucumber", "Tomato", "Butter"], cost: 65 },
+        dinner: { name: "🍅 Tomato Lentil Soup", ingredients: ["Tomato (2)", "Red lentil (50g)", "Garlic", "Coriander"], cost: 42 }
+      },
+      Medium: {
+        breakfast: { name: "🫕 Vegetable Upma", ingredients: ["Semolina (1 cup)", "Mixed veggies", "Mustard seeds", "Curry leaves"], cost: 55 },
+        lunch: { name: "🥘 Chole Bhature", ingredients: ["Chickpeas (200g)", "Onion-tomato masala", "Spices", "Flour for bhature"], cost: 98 },
+        dinner: { name: "🧀 Paneer Butter Masala", ingredients: ["Paneer (200g)", "Tomato puree", "Butter", "Cream", "Kasuri methi"], cost: 135 }
+      },
+      Relaxed: {
+        breakfast: { name: "🥔 Aloo Paratha + Curd", ingredients: ["Potato (2)", "Wheat flour", "Butter", "Yogurt"], cost: 68 },
+        lunch: { name: "🍛 Veg Thali (Dal, Sabzi, Rice)", ingredients: ["Toor dal", "Mix veg sabzi", "Steamed rice", "Roti", "Papad"], cost: 145 },
+        dinner: { name: "🍚 Dal Makhani & Jeera Rice", ingredients: ["Whole black lentil", "Butter", "Cream", "Jeera rice"], cost: 160 }
+      }
+    },
+    "Non-Veg": {
+      Quick: {
+        breakfast: { name: "🍳 Egg White Omelette", ingredients: ["Eggs (3)", "Onion", "Tomato", "Mushrooms"], cost: 70 },
+        lunch: { name: "🍗 Chicken Mayo Wrap", ingredients: ["Chicken (100g)", "Tortilla wrap", "Mayo", "Lettuce"], cost: 115 },
+        dinner: { name: "🥚 Egg Curry", ingredients: ["Eggs (2)", "Onion-tomato gravy", "Coconut milk"], cost: 85 }
+      },
+      Medium: {
+        breakfast: { name: "🍳 Bhurji Pav", ingredients: ["Eggs (3)", "Pav (2 buns)", "Onion", "Capsicum"], cost: 88 },
+        lunch: { name: "🍛 Chicken Curry + Rice", ingredients: ["Chicken (200g)", "Curry masala", "Onion", "Rice"], cost: 165 },
+        dinner: { name: "🐟 Fish Fry with Veg Rice", ingredients: ["Fish fillet (150g)", "Rice", "Mixed veggies", "Fish masala"], cost: 190 }
+      },
+      Relaxed: {
+        breakfast: { name: "🍗 Chicken Sausage Scramble", ingredients: ["Chicken sausage (2)", "Eggs (3)", "Bell peppers"], cost: 125 },
+        lunch: { name: "🍚 Chicken Biryani", ingredients: ["Chicken (250g)", "Basmati rice", "Biryani masala", "Yogurt"], cost: 255 },
+        dinner: { name: "🔥 Tandoori Chicken Platter", ingredients: ["Chicken legs (2)", "Hung curd", "Tandoori spices", "Salad"], cost: 230 }
+      }
+    },
+    Vegan: {
+      Quick: {
+        breakfast: { name: "🥣 Berry Chia Pudding", ingredients: ["Chia seeds", "Almond milk", "Berries", "Maple syrup"], cost: 85 },
+        lunch: { name: "🥑 Chickpea Avocado Bowl", ingredients: ["Chickpeas", "Avocado", "Quinoa", "Lemon", "Tahini"], cost: 110 },
+        dinner: { name: "🥥 Coconut Lentil Soup", ingredients: ["Red lentils", "Coconut milk", "Spinach", "Ginger"], cost: 92 }
+      },
+      Medium: {
+        breakfast: { name: "🌯 Tofu Scramble Wrap", ingredients: ["Tofu (150g)", "Whole wheat wrap", "Spinach", "Tomato"], cost: 102 },
+        lunch: { name: "🍛 Vegan Thai Curry", ingredients: ["Tofu (120g)", "Coconut milk", "Bell peppers", "Thai curry paste"], cost: 148 },
+        dinner: { name: "🍝 Mushroom Lentil Pasta", ingredients: ["Pasta", "Brown lentils", "Mushroom", "Tomato sauce"], cost: 125 }
+      },
+      Relaxed: {
+        breakfast: { name: "🥞 Vegan Banana Pancakes", ingredients: ["Banana (2)", "Oat flour", "Plant milk", "Maple syrup"], cost: 108 },
+        lunch: { name: "🍛 Tofu Biryani", ingredients: ["Tofu (200g)", "Basmati rice", "Vegan yogurt", "Biryani spices"], cost: 195 },
+        dinner: { name: "🥘 Jackfruit Chickpea Curry", ingredients: ["Young jackfruit", "Chickpeas", "Coconut milk", "Garlic"], cost: 178 }
+      }
+    }
+  };
+
+  // helper: get plan from DB
+  function getDailyPlan(diet, timePref) {
+    const dietData = MEAL_DB[diet];
+    if (!dietData) return null;
+    const timeData = dietData[timePref];
+    if (!timeData) return null;
+    return {
+      breakfast: timeData.breakfast,
+      lunch: timeData.lunch,
+      dinner: timeData.dinner
+    };
+  }
+
+  // extract unique grocery list from 3 meals
+  function buildUniqueGrocery(plan) {
+    const all = [
+      ...(plan.breakfast.ingredients || []),
+      ...(plan.lunch.ingredients || []),
+      ...(plan.dinner.ingredients || [])
+    ];
+    const uniqueMap = new Map();
+    for (let item of all) {
+      const key = item.trim().toLowerCase();
+      if (!uniqueMap.has(key)) uniqueMap.set(key, item);
+    }
+    return Array.from(uniqueMap.values());
+  }
+
+  // total estimated cost
+  function computeTotalCost(plan) {
+    return plan.breakfast.cost + plan.lunch.cost + plan.dinner.cost;
+  }
+
+  // dynamic substitutions based on budget situation + diet
+  function generateSubstitutions(totalCost, userBudget, diet, plan) {
+    const suggestions = [];
+    const over = totalCost - userBudget;
+    
+    // baseline smart swaps
+    suggestions.push("🥄 Replace heavy cream with Greek yogurt or coconut milk (saves ₹25-45)");
+    suggestions.push("🌾 Swap white rice with millet or brown rice – similar cost, better nutrition");
+    
+    if (over > 0) {
+      suggestions.push(`⚠️ Budget overrun by ₹${over}. Apply cost‑saving tweaks:`);
+      if (diet === "Non-Veg") {
+        suggestions.push("🍗 Chicken thigh instead of breast (saves ₹40-60)");
+        suggestions.push("🥚 Use eggs as main protein in one meal instead of premium meat");
+      } else if (diet === "Veg") {
+        suggestions.push("🧀 Paneer → Tofu (saves ₹45 & works great in curries)");
+        suggestions.push("🥛 Replace cream with blended cashew paste (low‑cost creamy texture)");
+      } else if (diet === "Vegan") {
+        suggestions.push("🥑 Omit avocado, add roasted pumpkin seeds (saves ₹60)");
+        suggestions.push("🌰 Homemade oat milk instead of store‑bought almond milk");
+      }
+      suggestions.push("🛒 Buy seasonal local vegetables instead of exotic ones (save ~20%)");
+    } else {
+      suggestions.push(`✅ Within budget! you can add a fruit or side salad with extra ₹${userBudget - totalCost}`);
+      suggestions.push("💡 Use local farmers market to further reduce cost without sacrificing quality");
+    }
+    
+    // meal-specific hints
+    if (plan.lunch.name.includes("Paneer")) suggestions.push("🔄 Paneer → Tofu or Paneer → 50% mushroom blend");
+    if (plan.dinner.name.includes("Biryani") && totalCost > 200) suggestions.push("🍚 Reduce meat/tofu portion & increase vegetables → saves ₹30");
+    return [...new Set(suggestions)];
+  }
+
+  // ----- RENDER FULL UI -----
+  function renderApplication(plan, userBudget) {
+    const totalCost = computeTotalCost(plan);
+    const groceryList = buildUniqueGrocery(plan);
+    const isOver = totalCost > userBudget;
+    const diet = document.getElementById('dietSelect').value;
+    const substitutions = generateSubstitutions(totalCost, userBudget, diet, plan);
+    
+    // meals HTML
+    const mealsHtml = `
+      <div class="meal-grid">
+        <div class="meal-item">
+          <h3>🌅 Breakfast</h3>
+          <div class="meal-name">${plan.breakfast.name}</div>
+          <ul class="ingredient-list">${plan.breakfast.ingredients.map(i => `<li>🍽️ ${i}</li>`).join('')}</ul>
+          <div class="cost-tag">💰 ₹${plan.breakfast.cost}</div>
+        </div>
+        <div class="meal-item">
+          <h3>☀️ Lunch</h3>
+          <div class="meal-name">${plan.lunch.name}</div>
+          <ul class="ingredient-list">${plan.lunch.ingredients.map(i => `<li>🍽️ ${i}</li>`).join('')}</ul>
+          <div class="cost-tag">💰 ₹${plan.lunch.cost}</div>
+        </div>
+        <div class="meal-item">
+          <h3>🌙 Dinner</h3>
+          <div class="meal-name">${plan.dinner.name}</div>
+          <ul class="ingredient-list">${plan.dinner.ingredients.map(i => `<li>🍽️ ${i}</li>`).join('')}</ul>
+          <div class="cost-tag">💰 ₹${plan.dinner.cost}</div>
+        </div>
+      </div>
+    `;
+    
+    // budget panel with feasibility logic
+    const budgetHtml = `
+      <div class="budget-panel" style="background: ${isOver ? '#2c241a' : '#1a2c1f'}">
+        <span><strong>💰 Total estimated cost:</strong> ₹${totalCost}</span>
+        <span><strong>🎯 Your budget:</strong> ₹${userBudget}</span>
+        <span class="${isOver ? 'budget-warning' : 'budget-safe'}">
+          ${isOver ? `⚠️ OVER BUDGET by ₹${totalCost - userBudget}` : `✅ WITHIN BUDGET (₹${userBudget - totalCost} surplus)`}
+        </span>
+      </div>
+    `;
+    
+    // dynamic grocery checklist with progress tracking
+    let checkboxesHtml = '';
+    groceryList.forEach((item, idx) => {
+      const escapedItem = item.replace(/"/g, '&quot;');
+      checkboxesHtml += `
+        <label class="checklist-item" style="cursor:pointer;">
+          <input type="checkbox" class="grocery-check" data-ingredient="${escapedItem}">
+          <span>🛒 ${item}</span>
+        </label>
+      `;
+    });
+    
+    const groceryHtml = `
+      <div class="card">
+        <h3>📋 AI Grocery Checklist (auto‑generated from meals)</h3>
+        <div class="checklist-grid" id="groceryChecklistContainer">
+          ${checkboxesHtml}
+        </div>
+        <div class="progress-bar-bg">
+          <div id="progressFillDynamic" class="progress-fill" style="width:0%"></div>
+        </div>
+        <p id="progressStatsText">0/${groceryList.length} items collected</p>
+      </div>
+    `;
+    
+    // substitutions card
+    const subHtml = `
+      <div class="card">
+        <h3>🧠 Smart Substitutions & Budget Feasibility Logic</h3>
+        <ul class="substitution-list">
+          ${substitutions.map(s => `<li>✨ ${s}</li>`).join('')}
+        </ul>
+        <p style="font-size:0.7rem; margin-top:0.5rem;">🤖 Real‑time feasibility • ingredient‑aware swaps</p>
+      </div>
+    `;
+    
+    const actionHtml = `
+      <div class="card" style="display:flex; gap:12px; flex-wrap:wrap;">
+        <button id="printPlanBtn" class="print-btn" style="flex:1;">🖨️ Save as PDF / Print</button>
+      </div>
+    `;
+    
+    const fullHtml = mealsHtml + budgetHtml + groceryHtml + subHtml + actionHtml;
+    document.getElementById('dynamicContent').innerHTML = fullHtml;
+    
+    // Attach progress tracker
+    const checkboxes = document.querySelectorAll('.grocery-check');
+    const fillBar = document.getElementById('progressFillDynamic');
+    const statsSpan = document.getElementById('progressStatsText');
+    
+    function updateProgress() {
+      const total = checkboxes.length;
+      const checked = Array.from(checkboxes).filter(cb => cb.checked).length;
+      const percent = total === 0 ? 0 : (checked / total) * 100;
+      if (fillBar) fillBar.style.width = `${percent}%`;
+      if (statsSpan) statsSpan.innerText = `${checked}/${total} items collected (${Math.round(percent)}%)`;
+    }
+    
+    checkboxes.forEach(cb => cb.addEventListener('change', updateProgress));
+    updateProgress();
+    
+    // Print handler
+    const printBtn = document.getElementById('printPlanBtn');
+    if (printBtn) printBtn.addEventListener('click', () => window.print());
+  }
+  
+  // main generation flow
+  function generatePlan() {
+    let budget = parseInt(document.getElementById('budgetInput').value, 10);
+    if (isNaN(budget) || budget < 50) budget = 400;
+    const diet = document.getElementById('dietSelect').value;
+    const timePref = document.getElementById('timeSelect').value;
+    
+    const plan = getDailyPlan(diet, timePref);
+    if (!plan) {
+      document.getElementById('dynamicContent').innerHTML = `<div class="card">❌ No meal plan found, please refresh.</div>`;
+      return;
+    }
+    
+    // show loader
+    document.getElementById('dynamicContent').innerHTML = `<div class="card" style="text-align:center;">🧠 AI Chef is building your personalized to‑do list ...</div>`;
+    setTimeout(() => renderApplication(plan, budget), 30);
+  }
+  
+  // event binding & initial load
+  document.addEventListener('DOMContentLoaded', () => {
+    const genBtn = document.getElementById('generatePlanBtn');
+    if (genBtn) genBtn.addEventListener('click', generatePlan);
+    // set defaults and generate first view
+    document.getElementById('budgetInput').value = "550";
+    document.getElementById('dietSelect').value = "Veg";
+    document.getElementById('timeSelect').value = "Medium";
+    generatePlan();
+  });
+</script>
+</body>
+</html>
